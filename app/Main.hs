@@ -1,9 +1,10 @@
 module Main where
 
 import           Noter.ParseDocument
+import           Noter.PrintDocument
 
 main :: IO ()
 main = do
   file <- readDocument <$> readFile "data"
-  print file
+  putStr $ documentString defaultDocumentStyle file
   return ()

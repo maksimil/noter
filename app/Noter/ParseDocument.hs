@@ -1,12 +1,13 @@
-module Noter.ParseDocument (readDocument) where
+module Noter.ParseDocument (readDocument, Document) where
 
 import           Data.Bifunctor (second)
 
 type Heading = String
-
 type Contents = [String]
-
 type Document = [(Heading, Contents)]
+
+emptyHeading :: String
+emptyHeading = "Base"
 
 data Token
   = HeadLine String
@@ -32,17 +33,19 @@ trim fn = trimFront fn . trimBack fn
 trimString :: String -> String
 trimString = trim (==' ')
 
-taggedSplit :: (a->Maybe b) -> [(b,[a])] ->  [a] -> [(b,[a])]
-taggedSplit fn = foldl (\acc c -> folder acc c (fn c))
+taggedSplit :: (a->Maybe b) -> b -> [a] -> [(b,[a])]
+taggedSplit fn initialHeading = foldl (\acc c -> folder acc c (fn c)) []
   where
-    folder :: [(b,[a])] -> a -> Maybe b -> [(b,[a])]
+    -- folder :: [(b,[a])] -> a -> Maybe b -> [(b,[a])]
     folder acc _ (Just tag) = acc++[(tag, [])]
+    folder [] el Nothing    = [(initialHeading, [el])]
     folder acc el Nothing   = init acc ++ [combine (last acc) el]
+
     combine :: (b, [a]) -> a -> (b,[a])
     combine (tag, lst) el = (tag, lst ++ [el])
 
 splitList :: (a->Bool)->[a]->[[a]]
-splitList fn = fmap snd . taggedSplit (\x -> if' (fn x) (Just ()) Nothing) [((),[])]
+splitList fn = fmap snd . taggedSplit (\x -> if' (fn x) (Just ()) Nothing) ()
 
 splitLines :: String -> [String]
 splitLines = splitList (=='\n')
@@ -54,18 +57,17 @@ tokenize = fmap lineMap
     lineMap line = if' (head line == '#') (HeadLine . trim (==' ') . tail) DataLine line
 
 documentFromTokens :: [Token] -> Document
-documentFromTokens = fmap (second parseContents) . taggedSplit getHeading [("Base", [])]
+documentFromTokens = fmap (second parseContents) . taggedSplit getHeading emptyHeading
   where
     getHeading (HeadLine line) = Just line
     getHeading _               = Nothing
 
 parseContents :: [Token] -> [String]
-parseContents = fmap (foldl combineLines "") . splitList (==EmptyLine) . trim (==EmptyLine)
+parseContents = filter (/="") . fmap (foldl combineLines "") . splitList (==EmptyLine) . trim (==EmptyLine)
   where
     combineLines "" (DataLine line)  = trimString line
     combineLines acc (DataLine line) = acc++" "++trimString line
     combineLines acc _               = acc
-
 
 readDocument :: String -> Document
 readDocument = documentFromTokens . tokenize . splitLines

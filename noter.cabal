@@ -17,6 +17,6 @@ executable noter
 
     hs-source-dirs:   app
 
-    other-modules:    Noter.ParseDocument
+    other-modules:    Noter.ParseDocument Noter.PrintDocument
 
     default-language: Haskell2010
