@@ -1,6 +1,7 @@
 module Noter.ParseDocument (readDocument, Document) where
 
 import           Data.Bifunctor (second)
+import           Noter.Utils
 
 type Heading = String
 type Contents = [String]
@@ -14,10 +15,6 @@ data Token
   | DataLine String
   | EmptyLine
   deriving (Show, Eq)
-
-if' :: Bool -> a -> a -> a
-if' True r _  = r
-if' False _ r = r
 
 trimFront :: (a-> Bool)->[a]->[a]
 trimFront _ []   = []
