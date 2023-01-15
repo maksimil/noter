@@ -1,4 +1,4 @@
-module Noter.ParseDocument (readDocument, Document) where
+module Noter.ParseDocument where
 
 import           Data.Bifunctor (second)
 import           Noter.Utils

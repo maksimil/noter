@@ -1,4 +1,4 @@
-module Noter.PrintDocument (documentString, defaultDocumentStyle, DocumentStyle) where
+module Noter.PrintDocument where
 
 import           Noter.ParseDocument
 
@@ -17,7 +17,8 @@ defaultDocumentStyle :: DocumentStyle
 defaultDocumentStyle = DocumentStyle {formatHeading = defaultFormatHeading, formatLine = id}
 
 joinList :: [a] -> [[a]] -> [a]
-joinList sep = foldl1 (\acc sublist -> acc ++ sep ++ sublist)
+joinList _ []      = []
+joinList sep  list = foldl1 (\acc sublist -> acc ++ sep ++ sublist) list
 
 documentString :: DocumentStyle -> Document -> String
 documentString style = joinList "\n\n" .  foldl (\acc idxPart -> acc++headingString idxPart) [] . zip [1..]

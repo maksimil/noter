@@ -1,4 +1,4 @@
-module Noter.Utils(if') where
+module Noter.Utils where
 
 if' :: Bool -> a -> a -> a
 if' True r _  = r
